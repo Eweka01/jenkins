@@ -1,0 +1,48 @@
+pipeline {
+    agent any
+    
+    stages {
+        stage('Checkout') {
+            steps {
+                // Checks out source code from your repo
+                checkout scm
+            }
+        }
+        
+        stage('Build') {
+            steps {
+                // Example for Maven project
+                sh 'mvn clean compile'
+                
+                // For Gradle, use: sh './gradlew build'
+                // For npm, use: sh 'npm install'
+            }
+        }
+        
+        stage('Test') {
+            steps {
+                // Example for running tests
+                sh 'mvn test'
+                
+                // For Gradle: sh './gradlew test'
+                // For npm: sh 'npm test'
+            }
+        }
+    }
+    
+    post {
+        always {
+            // Archive results regardless of build status
+            archiveArtifacts artifacts: '**/target/**/*.jar', allowEmptyArchive: true
+            junit '**/target/surefire-reports/*.xml'
+        }
+        
+        success {
+            echo 'Build succeeded!'
+        }
+        
+        failure {
+            echo 'Build failed!'
+        }
+    }
+}
